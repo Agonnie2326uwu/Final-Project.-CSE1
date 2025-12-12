@@ -9,17 +9,13 @@ HEADERS = {
     "Authorization": TOKEN
 }
 
-# -------------------------------------
-# GET ALL BIRDS
-# -------------------------------------
+
 def get_all_birds():
     r = requests.get(f"{BASE_URL}/birds")
     print("\nGET /birds:", r.status_code)
     print(r.json())
 
-# -------------------------------------
-# CREATE A NEW BIRD
-# -------------------------------------
+
 def create_bird():
     data = {
         "specificname": "Maya.",
@@ -32,9 +28,7 @@ def create_bird():
     print("\nPOST /birds:", r.status_code)
     print(r.json())
 
-# -------------------------------------
-# UPDATE A BIRD
-# -------------------------------------
+
 def update_bird(id):
     data = {
         "specificname": "Updated Bird",
@@ -47,17 +41,13 @@ def update_bird(id):
     print("\nPUT /birds/<id>:", r.status_code)
     print(r.json())
 
-# -------------------------------------
-# DELETE A BIRD
-# -------------------------------------
+
 def delete_bird(id):
     r = requests.delete(f"{BASE_URL}/birds/{id}", headers=HEADERS)
     print("\nDELETE /birds/<id>:", r.status_code)
     print(r.json())
 
-# -------------------------------------
-# MAIN
-# -------------------------------------
+
 if __name__ == "__main__":
     print("1. CURRENT BIRDS:")
     get_all_birds()

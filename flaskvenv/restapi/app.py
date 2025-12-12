@@ -16,9 +16,7 @@ mysql = MySQL(app)
 
 SECRET_KEY = "mysecretkey123"
 
-# -------------------------
-# LOGIN (generates token)
-# -------------------------
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json.get("username")
@@ -35,9 +33,7 @@ def login():
     return jsonify({"error": "Invalid credentials"}), 401
 
 
-# -------------------------
-# TOKEN PROTECTION
-# -------------------------
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -55,9 +51,7 @@ def token_required(f):
     return decorated
 
 
-# -------------------------
-# XML / JSON FORMAT OUTPUT
-# -------------------------
+
 def format_output(data, format_type="json"):
     if format_type == "xml":
         xml = dicttoxml(data, custom_root='response', attr_type=False)
@@ -68,9 +62,7 @@ def format_output(data, format_type="json"):
     return jsonify(data)
 
 
-# -------------------------
-# GET ALL BIRDS
-# -------------------------
+
 @app.route('/birds', methods=['GET'])
 def get_birds():
     format_type = request.args.get("format", "json")
@@ -82,9 +74,7 @@ def get_birds():
     return format_output(birds, format_type)
 
 
-# -------------------------
-# GET BIRD BY ID
-# -------------------------
+
 @app.route('/birds/<int:id>', methods=['GET'])
 def get_bird(id):
     format_type = request.args.get("format", "json")
@@ -99,9 +89,7 @@ def get_bird(id):
     return format_output(bird, format_type)
 
 
-# -------------------------
-# CREATE BIRD (Protected)
-# -------------------------
+
 @app.route('/birds', methods=['POST'])
 @token_required
 def create_bird():
@@ -123,9 +111,7 @@ def create_bird():
     return jsonify({"message": "Bird added successfully"}), 201
 
 
-# -------------------------
-# UPDATE BIRD (Protected)
-# -------------------------
+
 @app.route('/birds/<int:id>', methods=['PUT'])
 @token_required
 def update_bird(id):
@@ -151,9 +137,7 @@ def update_bird(id):
     return jsonify({"message": "Bird updated successfully"}), 200
 
 
-# -------------------------
-# DELETE BIRD (Protected)
-# -------------------------
+
 @app.route('/birds/<int:id>', methods=['DELETE'])
 @token_required
 def delete_bird(id):
@@ -170,9 +154,7 @@ def delete_bird(id):
     return jsonify({"message": "Bird deleted successfully"}), 200
 
 
-# -------------------------
-# SEARCH BIRDS
-# -------------------------
+
 @app.route('/birds/search', methods=['GET'])
 def search_birds():
     format_type = request.args.get("format", "json")

@@ -14,7 +14,7 @@ def pretty_print(resp):
         except Exception:
             print(resp.text)
     else:
-        # probably XML or plain text
+       
         print(resp.text)
 
 def step_login(username="admin", password="password"):
