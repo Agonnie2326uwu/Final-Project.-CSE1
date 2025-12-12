@@ -15,6 +15,23 @@ mysql = MySQL(app)
 
 SECRET_KEY = "mysecretkey123"
 
+@app.route('/')
+def home():
+    return {
+        "message": "Welcome to the Birds API!",
+        "endpoints": {
+            "GET all birds": "GET /birds",
+            "GET one bird": "GET /birds/<id>",
+            "CREATE bird": "POST /birds (token required)",
+            "UPDATE bird": "PUT /birds/<id> (token required)",
+            "DELETE bird": "DELETE /birds/<id> (token required)",
+            "SEARCH birds": "GET /birds/search?name=...&habitat=...&status=...",
+            "Login for token": "POST /login { 'username': 'admin', 'password': 'password' }"
+        },
+        "note": "Add ?format=xml for XML output"
+    }
+
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json.get("username")
