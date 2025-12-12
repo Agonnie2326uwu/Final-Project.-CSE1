@@ -23,7 +23,7 @@ def get_all_birds():
 def create_bird():
     data = {
         "specificname": "Maya.",
-        "scientificname": "Lonchura atricapilla",
+        "scientificname": "Lonchura Atricapilla",
         "habitat": "Urban areas",
         "status": "Common"
     }
