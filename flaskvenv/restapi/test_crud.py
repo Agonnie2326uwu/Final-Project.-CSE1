@@ -2,66 +2,77 @@ import requests
 
 BASE_URL = "http://127.0.0.1:5000"
 
+def print_result(title, response):
+    print(f"\n{title}:")
+    print(f"Status: {response.status_code}")
+    try:
+        print(response.json())
+    except:
+        print(response.text)
 
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW4iLCJleHAiOjE3NjU1NDYzNTN9.8NDGBgzZVMUsx9Byhy_fPbOUSbwVokIDfNifPhU4JU0"
+print("LOGIN")
+username = input("Username: ")
+password = input("Password: ")
 
-HEADERS = {
-    "Authorization": TOKEN
+login_response = requests.post(f"{BASE_URL}/login", json={
+    "username": username,
+    "password": password
+})
+print_result("LOGIN", login_response)
+
+token = login_response.json().get("token")
+
+if not token:
+    print("No token received. Exiting.")
+    exit()
+
+headers = {
+    "Authorization": f"Bearer {token}"
 }
 
+print("\nCREATE BIRD")
+specificname = input("Specific name: ")
+scientificname = input("Scientific name: ")
+habitat = input("Habitat: ")
+status = input("Status: ")
 
-def get_all_birds():
-    r = requests.get(f"{BASE_URL}/birds")
-    print("\nGET /birds:", r.status_code)
-    print(r.json())
+create_response = requests.post(f"{BASE_URL}/birds", json={
+    "specificname": specificname,
+    "scientificname": scientificname,
+    "habitat": habitat,
+    "status": status
+}, headers=headers)
+print_result("CREATE BIRD", create_response)
 
+all_birds_response = requests.get(f"{BASE_URL}/birds")
+birds = all_birds_response.json()
+print_result("ALL BIRDS", all_birds_response)
 
-def create_bird():
-    data = {
-        "specificname": "Maya.",
-        "scientificname": "Lonchura Atricapilla",
-        "habitat": "Urban areas",
-        "status": "Common"
-    }
+if not birds:
+    print("No birds found.")
+    exit()
 
-    r = requests.post(f"{BASE_URL}/birds", json=data, headers=HEADERS)
-    print("\nPOST /birds:", r.status_code)
-    print(r.json())
+new_id = birds[-1]["idbirds"]
+print(f"New Bird ID: {new_id}")
 
+print("\nUPDATE BIRD")
+specificname = input("New specific name: ")
+scientificname = input("New scientific name: ")
+habitat = input("New habitat: ")
+status = input("New status: ")
 
-def update_bird(id):
-    data = {
-        "specificname": "Updated Bird",
-        "scientificname": "Updated Scientific",
-        "habitat": "Forest",
-        "status": "Endangered"
-    }
+update_response = requests.put(f"{BASE_URL}/birds/{new_id}", json={
+    "specificname": specificname,
+    "scientificname": scientificname,
+    "habitat": habitat,
+    "status": status
+}, headers=headers)
+print_result("UPDATE BIRD", update_response)
 
-    r = requests.put(f"{BASE_URL}/birds/{id}", json=data, headers=HEADERS)
-    print("\nPUT /birds/<id>:", r.status_code)
-    print(r.json())
+delete_confirm = input(f"Delete bird {new_id}? (y/n): ")
+if delete_confirm.lower() == "y":
+    delete_response = requests.delete(f"{BASE_URL}/birds/{new_id}", headers=headers)
+    print_result("DELETE BIRD", delete_response)
 
-
-def delete_bird(id):
-    r = requests.delete(f"{BASE_URL}/birds/{id}", headers=HEADERS)
-    print("\nDELETE /birds/<id>:", r.status_code)
-    print(r.json())
-
-
-if __name__ == "__main__":
-    print("1. CURRENT BIRDS:")
-    get_all_birds()
-
-    print("\n2. ADDING NEW BIRD:")
-    create_bird()
-
-    bird_id = int(input("\nEnter ID of bird to update/delete: "))
-
-    print("\n3. UPDATING BIRD:")
-    update_bird(bird_id)
-
-    print("\n4. DELETING BIRD:")
-    delete_bird(bird_id)
-
-    print("\n5. FINAL BIRDS LIST:")
-    get_all_birds()
+final_list = requests.get(f"{BASE_URL}/birds")
+print_result("FINAL BIRDS LIST", final_list)
