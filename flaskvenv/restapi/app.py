@@ -1,21 +1,19 @@
-from flask import Flask, request, jsonify, make_response 
+from flask import Flask, request, jsonify, make_response
 from flask_mysqldb import MySQL
 import requests
 from dicttoxml import dicttoxml
 import jwt
-import datetime
 from functools import wraps
 
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'      
-app.config['MYSQL_PASSWORD'] = 'root'      
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'animals'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
 SECRET_KEY = "mysecretkey123"
-
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -24,14 +22,13 @@ def login():
 
     if username == "admin" and password == "password":
         token = jwt.encode(
-            {"user": username, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)},
+            {"user": username},
             SECRET_KEY,
             algorithm="HS256"
         )
         return jsonify({"token": token})
 
     return jsonify({"error": "Invalid credentials"}), 401
-
 
 
 def token_required(f):
@@ -51,50 +48,40 @@ def token_required(f):
     return decorated
 
 
-
 def format_output(data, format_type="json"):
     if format_type == "xml":
         xml = dicttoxml(data, custom_root='response', attr_type=False)
         response = make_response(xml, 200)
         response.headers['Content-Type'] = 'application/xml'
         return response
-        
-    return jsonify(data)
 
+    return jsonify(data)
 
 
 @app.route('/birds', methods=['GET'])
 def get_birds():
     format_type = request.args.get("format", "json")
-
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM birds")
     birds = cursor.fetchall()
-
     return format_output(birds, format_type)
-
 
 
 @app.route('/birds/<int:id>', methods=['GET'])
 def get_bird(id):
     format_type = request.args.get("format", "json")
-
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM birds WHERE idbirds=%s", (id,))
     bird = cursor.fetchone()
-
     if not bird:
         return jsonify({"error": "Bird not found"}), 404
-
     return format_output(bird, format_type)
-
 
 
 @app.route('/birds', methods=['POST'])
 @token_required
 def create_bird():
     data = request.get_json()
-
     required = ["specificname", "scientificname", "habitat", "status"]
     if not all(field in data for field in required):
         return jsonify({"error": "Missing required fields"}), 400
@@ -103,20 +90,15 @@ def create_bird():
     cursor.execute("""
         INSERT INTO birds (specificname, scientificname, habitat, status)
         VALUES (%s, %s, %s, %s)
-    """, (data["specificname"], data["scientificname"],
-          data["habitat"], data["status"]))
-
+    """, (data["specificname"], data["scientificname"], data["habitat"], data["status"]))
     mysql.connection.commit()
-
     return jsonify({"message": "Bird added successfully"}), 201
-
 
 
 @app.route('/birds/<int:id>', methods=['PUT'])
 @token_required
 def update_bird(id):
     data = request.get_json()
-
     required = ["specificname", "scientificname", "habitat", "status"]
     if not all(field in data for field in required):
         return jsonify({"error": "Missing required fields"}), 400
@@ -132,10 +114,8 @@ def update_bird(id):
         SET specificname=%s, scientificname=%s, habitat=%s, status=%s
         WHERE idbirds=%s
     """, (data["specificname"], data["scientificname"], data["habitat"], data["status"], id))
-
     mysql.connection.commit()
     return jsonify({"message": "Bird updated successfully"}), 200
-
 
 
 @app.route('/birds/<int:id>', methods=['DELETE'])
@@ -144,15 +124,12 @@ def delete_bird(id):
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM birds WHERE idbirds=%s", (id,))
     bird = cursor.fetchone()
-
     if not bird:
         return jsonify({"error": "Bird not found"}), 404
 
     cursor.execute("DELETE FROM birds WHERE idbirds=%s", (id,))
     mysql.connection.commit()
-
     return jsonify({"message": "Bird deleted successfully"}), 200
-
 
 
 @app.route('/birds/search', methods=['GET'])
@@ -180,7 +157,6 @@ def search_birds():
     cursor = mysql.connection.cursor()
     cursor.execute(query, params)
     birds = cursor.fetchall()
-
     return format_output(birds, format_type)
 
 
